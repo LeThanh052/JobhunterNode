@@ -1,11 +1,11 @@
 import { PermissionPayload } from "../../types/express";
 
 export type AuthenticatedUser = {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: {
-    _id: string;
+    id: string;
     name: string;
   };
   permissions: PermissionPayload[];

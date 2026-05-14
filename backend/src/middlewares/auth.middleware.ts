@@ -4,11 +4,11 @@ import { verifyAccessToken } from "../utils/jwt";
 import { authService } from "../modules/auth/auth.service";
 
 type TokenPayload = JwtPayload & {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: {
-    _id: string;
+    id: string;
     name: string;
   };
 };
@@ -31,7 +31,7 @@ export async function authMiddleware(request: Request, _response: Response, next
 
   try {
     const payload = verifyAccessToken(token) as TokenPayload;
-    const hydratedUser = await authService.loadUserPermissions(payload._id);
+    const hydratedUser = await authService.loadUserPermissions(payload.id);
 
     if (!hydratedUser) {
       const error = new Error("Token không hợp lệ or không có token ở Bearer Token ở Header request!") as Error & {

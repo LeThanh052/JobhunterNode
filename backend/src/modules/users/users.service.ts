@@ -23,7 +23,7 @@ function sanitizeUser(user: {
   updatedAt: Date;
 }) {
   return {
-    _id: user.id,
+    id: user.id,
     name: user.name,
     email: user.email,
     age: user.age,
@@ -32,7 +32,7 @@ function sanitizeUser(user: {
     company: user.company,
     role: user.role
       ? {
-          _id: user.role.id,
+          id: user.role.id,
           name: user.role.name
         }
       : null,
@@ -52,7 +52,7 @@ export class UsersService {
       address: string;
       role: string;
       company: {
-        _id: string;
+        id: string;
         name: string;
       };
     },
@@ -84,7 +84,7 @@ export class UsersService {
     });
 
     return {
-      _id: newUser.id,
+      id: newUser.id,
       createdAt: newUser.createdAt
     };
   }
@@ -151,7 +151,7 @@ export class UsersService {
 
   async update(
     input: {
-      _id: string;
+      id: string;
       name: string;
       email: string;
       age: number;
@@ -159,7 +159,7 @@ export class UsersService {
       address: string;
       role: string;
       company: {
-        _id: string;
+        id: string;
         name: string;
       };
     },
@@ -167,7 +167,7 @@ export class UsersService {
   ) {
     const result = await prisma.user.updateMany({
       where: {
-        id: input._id,
+        id: input.id,
         deletedAt: null
       },
       data: {

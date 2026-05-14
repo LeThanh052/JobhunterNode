@@ -1,7 +1,7 @@
 import type { Request } from "express";
 
 export type PermissionPayload = {
-  _id: string;
+  id: string;
   name: string;
   apiPath: string;
   method: string;
@@ -9,11 +9,11 @@ export type PermissionPayload = {
 };
 
 export type RequestUser = {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: {
-    _id: string;
+    id: string;
     name: string;
   };
   permissions?: PermissionPayload[];

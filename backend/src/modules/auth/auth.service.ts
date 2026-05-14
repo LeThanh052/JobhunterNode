@@ -41,7 +41,7 @@ async function buildAuthenticatedUser(user: {
 }): Promise<AuthenticatedUser> {
   const permissions =
     user.role.permissions?.map(({ permission }) => ({
-      _id: permission.id,
+      id: permission.id,
       name: permission.name,
       apiPath: permission.apiPath,
       method: permission.method,
@@ -49,11 +49,11 @@ async function buildAuthenticatedUser(user: {
     })) ?? [];
 
   return {
-    _id: user.id,
+    id: user.id,
     name: user.name,
     email: user.email,
     role: {
-      _id: user.role.id,
+      id: user.role.id,
       name: user.role.name
     },
     permissions
@@ -111,7 +111,7 @@ export class AuthService {
     });
 
     return {
-      _id: newUser.id,
+      id: newUser.id,
       createdAt: newUser.createdAt
     };
   }
@@ -148,7 +148,7 @@ export class AuthService {
 
   async login(user: AuthenticatedUser, response: Response) {
     const payload = {
-      _id: user._id,
+      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role
@@ -156,7 +156,7 @@ export class AuthService {
 
     const refreshToken = signRefreshToken(payload);
     await prisma.user.update({
-      where: { id: user._id },
+      where: { id: user.id },
       data: { refreshToken }
     });
 
@@ -165,7 +165,7 @@ export class AuthService {
     return {
       access_token: signAccessToken(payload),
       user: {
-        _id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -176,7 +176,7 @@ export class AuthService {
 
   async getAccount(user: RequestUser) {
     const dbUser = await prisma.user.findUnique({
-      where: { id: user._id },
+      where: { id: user.id },
       include: {
         role: {
           include: {
@@ -236,7 +236,7 @@ export class AuthService {
 
     const authUser = await buildAuthenticatedUser(user);
     const payload = {
-      _id: authUser._id,
+      id: authUser.id,
       name: authUser.name,
       email: authUser.email,
       role: authUser.role
@@ -264,7 +264,7 @@ export class AuthService {
 
   async logout(user: RequestUser, response: Response) {
     await prisma.user.update({
-      where: { id: user._id },
+      where: { id: user.id },
       data: { refreshToken: "" }
     });
 

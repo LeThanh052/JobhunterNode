@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const companySchema = z.object({
-  _id: z.string().min(1),
+  id: z.string().min(1),
   name: z.string().min(1)
 });
 
@@ -17,7 +17,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  _id: z.string().min(1),
+  id: z.string().min(1),
   name: z.string().min(1),
   email: z.string().email(),
   age: z.coerce.number().int(),

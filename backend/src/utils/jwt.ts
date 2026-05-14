@@ -3,11 +3,11 @@ import ms from "ms";
 import { env } from "../config/env";
 
 type JwtUserPayload = {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: {
-    _id: string;
+    id: string;
     name: string;
   };
 };
