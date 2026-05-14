@@ -1,0 +1,116 @@
+name: Backend CD
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build:
+    name: Build Before Deploy
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jobhunter
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d jobhunter"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobhunter?schema=public
+      JWT_ACCESS_TOKEN_SECRET: test-secret
+      JWT_ACCESS_EXPIRE: 15m
+      JWT_REFRESH_TOKEN_SECRET: test-refresh-secret
+      JWT_REFRESH_EXPIRE: 1d
+      PORT: 8000
+      CLIENT_URL: http://localhost:3000
+      NODE_ENV: production
+      SHOULD_INIT: false
+      INIT_PASSWORD: 123456
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Sync schema to CI database
+        run: npx prisma db push
+
+      - name: Build
+        run: npm run build
+
+  deploy-staging:
+    name: Deploy Staging
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+    steps:
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.STAGING_APP_PATH }}
+            git fetch origin
+            git checkout develop
+            git pull origin develop
+            cd backend
+            docker compose down
+            docker compose up --build -d
+
+  deploy-production:
+    name: Deploy Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.PRODUCTION_APP_PATH }}
+            git fetch origin
+            git checkout main
+            git pull origin main
+            cd backend
+            docker compose down
+            docker compose up --build -d
