@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  age          Int
+  gender       String
+  address      String
+  company      Json?
+  refreshToken String?
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id])
+  resumes      Resume[]
+  createdBy    Json?
+  updatedBy    Json?
+  deletedBy    Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  @@index([roleId])
+  @@index([deletedAt])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String
+  isActive    Boolean
+  users       User[]
+  permissions RolePermission[]
+  createdBy   Json?
+  updatedBy   Json?
+  deletedBy   Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String
+  apiPath     String
+  method      String
+  module      String
+  roles       RolePermission[]
+  createdBy   Json?
+  updatedBy   Json?
+  deletedBy   Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([apiPath, method])
+  @@index([deletedAt])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  description String
+  logo        String
+  resumes     Resume[]
+  createdBy   Json?
+  updatedBy   Json?
+  deletedBy   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  name        String
+  skills      String[]
+  company     Json
+  location    String
+  salary      Int
+  quantity    Int
+  level       String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean
+  resumes     Resume[]
+  createdBy   Json?
+  updatedBy   Json?
+  deletedBy   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  email     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  url       String
+  status    String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  history   Json
+  createdBy Json?
+  updatedBy Json?
+  deletedBy Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([jobId])
+  @@index([deletedAt])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  skills    String[]
+  createdBy Json?
+  updatedBy Json?
+  deletedBy Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
