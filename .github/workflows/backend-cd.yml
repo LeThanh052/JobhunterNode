@@ -38,7 +38,7 @@ jobs:
       JWT_REFRESH_EXPIRE: 1d
       PORT: 8000
       CLIENT_URL: http://localhost:3000
-      NODE_ENV: production
+      NODE_ENV: test
       SHOULD_INIT: false
       INIT_PASSWORD: 123456
 
