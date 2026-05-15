@@ -16,7 +16,12 @@ const INIT_PERMISSIONS = [
   { name: "Fetch user with paginate", apiPath: "/api/v1/users", method: "GET", module: "USERS" },
   { name: "Fetch user by id", apiPath: "/api/v1/users/:id", method: "GET", module: "USERS" },
   { name: "Update a User", apiPath: "/api/v1/users/:id", method: "PATCH", module: "USERS" },
-  { name: "Delete a User", apiPath: "/api/v1/users/:id", method: "DELETE", module: "USERS" }
+  { name: "Delete a User", apiPath: "/api/v1/users/:id", method: "DELETE", module: "USERS" },
+  { name: "Create a new Company", apiPath: "/api/v1/companies", method: "POST", module: "COMPANIES" },
+  { name: "Fetch company with paginate", apiPath: "/api/v1/companies", method: "GET", module: "COMPANIES" },
+  { name: "Fetch company by id", apiPath: "/api/v1/companies/:id", method: "GET", module: "COMPANIES" },
+  { name: "Update a Company", apiPath: "/api/v1/companies/:id", method: "PATCH", module: "COMPANIES" },
+  { name: "Delete a Company", apiPath: "/api/v1/companies/:id", method: "DELETE", module: "COMPANIES" }
 ];
 
 async function main() {
