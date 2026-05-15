@@ -1,4 +1,4 @@
-name: Backend CD
+name: Backend Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build Before Deploy
+    name: Build
     runs-on: ubuntu-latest
 
     services:
@@ -64,53 +64,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-  deploy-staging:
-    name: Deploy Staging
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-    steps:
-      - name: Deploy to staging server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          port: ${{ secrets.STAGING_PORT }}
-          script: |
-            set -e
-            cd ${{ secrets.STAGING_APP_PATH }}
-            git fetch origin
-            git checkout develop
-            git pull origin develop
-            cd backend
-            docker compose down
-            docker compose up --build -d
-
-  deploy-production:
-    name: Deploy Production
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-    steps:
-      - name: Deploy to production server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          port: ${{ secrets.PRODUCTION_PORT }}
-          script: |
-            set -e
-            cd ${{ secrets.PRODUCTION_APP_PATH }}
-            git fetch origin
-            git checkout main
-            git pull origin main
-            cd backend
-            docker compose down
-            docker compose up --build -d
