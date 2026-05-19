@@ -3,10 +3,8 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { env } from "./config/env";
-import { authMiddleware } from "./middlewares/auth.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { notFoundMiddleware } from "./middlewares/not-found.middleware";
-import { permissionMiddleware } from "./middlewares/permission.middleware";
 import routes from "./routes";
 
 export function createApp() {
@@ -29,7 +27,7 @@ export function createApp() {
     response.status(200).json({ status: "ok", env: env.NODE_ENV });
   });
 
-  app.use("/api/v1", authMiddleware, permissionMiddleware, routes);
+  app.use("/api/v1", routes);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

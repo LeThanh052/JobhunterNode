@@ -22,12 +22,6 @@ export type RequestUser = {
 declare module "express-serve-static-core" {
   interface Request {
     user?: RequestUser;
-    routeMeta?: {
-      isPublic?: boolean;
-      skipPermission?: boolean;
-      message?: string;
-      permissionPath?: string;
-    };
   }
 }
 
