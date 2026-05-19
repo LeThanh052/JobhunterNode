@@ -13,41 +13,35 @@ type TokenPayload = JwtPayload & {
   };
 };
 
-export async function authMiddleware(request: Request, _response: Response, next: NextFunction) {
-  if (request.routeMeta?.isPublic) {
-    return next();
-  }
+function unauthorized() {
+  const error = new Error("Token không hợp lệ or không có token ở Bearer Token ở Header request!") as Error & {
+    statusCode?: number;
+  };
+  error.statusCode = 401;
+  return error;
+}
 
-  const authorization = request.headers.authorization;
-  const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined;
+export function requireAuth() {
+  return async (request: Request, _response: Response, next: NextFunction) => {
+    const authorization = request.headers.authorization;
+    const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined;
 
-  if (!token) {
-    const error = new Error("Token không hợp lệ or không có token ở Bearer Token ở Header request!") as Error & {
-      statusCode?: number;
-    };
-    error.statusCode = 401;
-    return next(error);
-  }
-
-  try {
-    const payload = verifyAccessToken(token) as TokenPayload;
-    const hydratedUser = await authService.loadUserPermissions(payload.id);
-
-    if (!hydratedUser) {
-      const error = new Error("Token không hợp lệ or không có token ở Bearer Token ở Header request!") as Error & {
-        statusCode?: number;
-      };
-      error.statusCode = 401;
-      return next(error);
+    if (!token) {
+      return next(unauthorized());
     }
 
-    request.user = hydratedUser;
-    return next();
-  } catch {
-    const error = new Error("Token không hợp lệ or không có token ở Bearer Token ở Header request!") as Error & {
-      statusCode?: number;
-    };
-    error.statusCode = 401;
-    return next(error);
-  }
+    try {
+      const payload = verifyAccessToken(token) as TokenPayload;
+      const hydratedUser = await authService.loadUserPermissions(payload.id);
+
+      if (!hydratedUser) {
+        return next(unauthorized());
+      }
+
+      request.user = hydratedUser;
+      return next();
+    } catch {
+      return next(unauthorized());
+    }
+  };
 }
